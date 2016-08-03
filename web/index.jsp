@@ -6,7 +6,8 @@
   </head>
   <body>
   <form action="/a.action">
-    <input type="text" name="username"/>
+    id:<input type="text" name="id"/>
+    username:<input type="text" name="username"/>
     <input type="submit" value="提交"/>
   </form>
   </body>

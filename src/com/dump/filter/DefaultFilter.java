@@ -1,6 +1,10 @@
 package com.dump.filter;
 
+import com.dump.filter.annotation.Param;
+import com.dump.filter.annotation.RequestMapping;
 import com.dump.filter.util.FindClassByAnnotationName;
+import com.sun.tools.javac.util.Convert;
+import test.model.Student;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,18 +15,20 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-public class DefaultFilter extends HttpServlet{
+/**
+ * Dump默认过滤器
+ */
+public class DefaultFilter extends HttpServlet {
     private Set<Class<?>> cons;
+
     @Override
-    public void init(){
-        System.out.println("init");
+    public void init() {
         try {
-            cons = FindClassByAnnotationName.getClass("test.controller","com.dump.filter.Controller");
+            cons = FindClassByAnnotationName.getClass("test.controller", "com.dump.filter.annotation.Controller");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -31,36 +37,58 @@ public class DefaultFilter extends HttpServlet{
     @Override
     public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String uri = request.getRequestURI();
-        String path = uri.substring(uri.lastIndexOf("/"),uri.lastIndexOf("."));
+        String path = uri.substring(uri.lastIndexOf("/"), uri.lastIndexOf("."));
         Iterator<Class<?>> it = cons.iterator();
         String returnUrl = "";
-        findUrl:while (it.hasNext()){
+        findUrl:
+        while (it.hasNext()) {
             Class<?> c = it.next();
-            for (Method method: c.getDeclaredMethods()){
+            for (Method method : c.getDeclaredMethods()) {
                 Annotation[] anns = method.getDeclaredAnnotations();
                 RequestMapping rm = (RequestMapping) anns[0];
-                if(rm.value().equals(path)){
+                if (rm.value().equals(path)) {
                     try {
                         Parameter[] parameters = method.getParameters();
                         Object[] paras = new Object[parameters.length];
-                        for (int i=0;i<parameters.length;i++){
+                        for (int i = 0; i < parameters.length; i++) {
                             Parameter p = parameters[i];
-                            if(p.getType().equals(HttpServletRequest.class)){
+                            if (p.getType().equals(HttpServletRequest.class)) {
                                 paras[i] = request;
-                            }else if(p.getType().equals(HttpServletResponse.class)){
+                            } else if (p.getType().equals(HttpServletResponse.class)) {
                                 paras[i] = response;
-                            }else if(p.getType().equals(HttpSession.class)){
+                            } else if (p.getType().equals(HttpSession.class)) {
                                 paras[i] = request.getSession();
-                            }else {
-                                System.out.println(p.isNamePresent());
-                                paras[i] = request.getParameter(p.getName());
+                            } else {
+                                if (p.getDeclaredAnnotation(Param.class) != null) {
+                                    Param param = (Param) p.getDeclaredAnnotations()[0];
+                                    paras[i] = request.getParameter(param.value());
+                                    request.setAttribute(param.value(), request.getParameter(param.value()));
+                                } else {
+                                    Class modelClass = p.getType();
+                                    Object obj = modelClass.newInstance();
+                                    Field[] fields = modelClass.getDeclaredFields();
+                                    for (Field f : fields) {
+                                        f.setAccessible(true);
+                                        String fieldParam = f.getName();
+                                        if(f.getType().equals(String.class)){
+                                            f.set(obj,request.getParameter(fieldParam));
+                                        }else if(f.getType().equals(int.class)){
+                                            if(request.getParameter(fieldParam)!=""){
+                                                f.set(obj,Integer.parseInt(request.getParameter(fieldParam)));
+                                            }else {
+                                                f.set(obj,0);
+                                            }
+                                        }
+                                    }
+                                    paras[i] = obj;
+                                }
                             }
                         }
                         Object o = c.newInstance();
-                        if(method.getReturnType().equals(String.class)){
-                            returnUrl = (String) method.invoke(o,paras);
-                        }else {
-                            method.invoke(o,paras);
+                        if (method.getReturnType().equals(String.class)) {
+                            returnUrl = (String) method.invoke(o, paras);
+                        } else {
+                            method.invoke(o, paras);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -69,12 +97,12 @@ public class DefaultFilter extends HttpServlet{
                 }
             }
         }
-        if(!returnUrl.equals("")){
-            if(returnUrl.split(":")[0].equals("redirect")){
+        if (!returnUrl.equals("")) {
+            if (returnUrl.split(":")[0].equals("redirect")) {
                 response.sendRedirect(returnUrl.split(":")[1]);
-            }else {
+            } else {
                 RequestDispatcher dispatcher = request.getRequestDispatcher(returnUrl);
-                dispatcher .forward(request, response);
+                dispatcher.forward(request, response);
             }
         }
     }

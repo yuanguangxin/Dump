@@ -1,4 +1,4 @@
-package com.dump.filter;
+package com.dump.filter.annotation;
 
 import java.lang.annotation.*;
 
