@@ -88,9 +88,9 @@ AOP及动态代理的实现基于`@Aspect`,`@PointCut`,`@Before`,`@After`. `@Asp
 **以上为Dump的基本功能以及用法介绍, Dump还有很多特性以及细节这里未能提及到, 想具体了解的可以fork本项目
 参与开发,也可以浏览用于本项目完成的[Demo实例](),喜欢的可以给我点个star给予支持, 欢迎大家提出宝贵意见。**
 
-**另外,我的博客有关于此项目的具体实现细节讲解,欢迎浏览。
+**另外,我的博客有关于此项目的具体实现细节讲解,欢迎浏览。**
 
-[My Blog](http://yuanguangxin.me)**
+**[My Blog](http://yuanguangxin.me)**
 
 
 
