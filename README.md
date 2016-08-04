@@ -9,7 +9,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 ### Structure
 
-![](screenshots/structure.png)
+![](web/screenshots/structure.png)
 
 ### How To Use
 
@@ -22,7 +22,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 项目唯一需要你配置的就是数据库的配置文件, 配置文件名为`jdbc.properties`,位于src目录下,配置项如下。
 
-![](screenshots/jdbc.png)
+![](web/screenshots/jdbc.png)
 
 当然`web.xml`文件也要配置为Dump默认的Filter,代码如下
 ```
