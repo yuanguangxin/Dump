@@ -4,6 +4,7 @@ import com.dump.bean.BeanFactory;
 import com.dump.filter.annotation.Param;
 import com.dump.filter.annotation.RequestMapping;
 import com.dump.util.FindClassByAnnotationName;
+import com.dump.util.PackagePath;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -12,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -27,7 +27,7 @@ public class DefaultFilter extends HttpServlet {
     @Override
     public void init() {
         try {
-            cons = FindClassByAnnotationName.getClass("test.controller", "com.dump.filter.annotation.Controller");
+            cons = FindClassByAnnotationName.getClass(PackagePath.getPath(), "com.dump.filter.annotation.Controller");
         } catch (Exception e) {
             e.printStackTrace();
         }

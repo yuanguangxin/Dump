@@ -4,6 +4,7 @@ import com.dump.proxy.DumpProxy;
 import com.dump.proxy.ProxyInstance;
 import com.dump.proxy.annotation.Aspect;
 import com.dump.util.FindClassByAnnotationName;
+import com.dump.util.PackagePath;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -21,7 +22,7 @@ public class BeanFactory {
     private BeanFactory() {
         Set<Class<?>> cons = null;
         try {
-            cons = FindClassByAnnotationName.getClass("test", "com.dump.bean.annotation.Autowired");
+            cons = FindClassByAnnotationName.getClass(PackagePath.getPath(), "com.dump.bean.annotation.Autowired");
             Iterator<Class<?>> it = cons.iterator();
             while (it.hasNext()) {
                 Class<?> cl = it.next();

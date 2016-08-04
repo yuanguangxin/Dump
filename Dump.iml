@@ -9,6 +9,7 @@
         <webroots>
           <root url="file://$MODULE_DIR$/web" relative="/" />
         </webroots>
+        <sourceRoots />
       </configuration>
     </facet>
   </component>
@@ -21,7 +22,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="mysql-connector" level="project" />
     <orderEntry type="library" name="servlet" level="project" />
-    <orderEntry type="library" name="xom" level="project" />
     <orderEntry type="library" name="cglib" level="project" />
   </component>
 </module>

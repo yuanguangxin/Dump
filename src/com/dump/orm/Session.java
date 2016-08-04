@@ -1,7 +1,6 @@
 package com.dump.orm;
 
 import com.dump.orm.util.JDBCUtil;
-import test.model.Student;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -184,9 +183,4 @@ public class Session {
         return "";
     }
 
-    public static void main(String[] args) throws Exception {
-        String sql = "select * from student";
-        List<Student> list = Session.getSession().getAll(Student.class);
-        System.out.println(list.size());
-    }
 }

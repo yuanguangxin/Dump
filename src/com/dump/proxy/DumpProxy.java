@@ -7,9 +7,8 @@ import java.util.Set;
 import com.dump.proxy.annotation.After;
 import com.dump.proxy.annotation.Before;
 import com.dump.util.FindClassByAnnotationName;
+import com.dump.util.PackagePath;
 import net.sf.cglib.proxy.*;
-import test.dao.StudentDao;
-import test.model.Student;
 
 public class DumpProxy implements MethodInterceptor{
     public Enhancer enhancer = new Enhancer();
@@ -18,7 +17,7 @@ public class DumpProxy implements MethodInterceptor{
     public Object intercept(Object object, Method method, Object[] args,
                             MethodProxy methodProxy) throws Throwable {
 
-        Set<Class<?>> cons = FindClassByAnnotationName.getClass("test", "com.dump.proxy.annotation.Aspect");
+        Set<Class<?>> cons = FindClassByAnnotationName.getClass(PackagePath.getPath(), "com.dump.proxy.annotation.Aspect");
         Iterator<Class<?>> it = cons.iterator();
         while (it.hasNext()){
             Class<?> cl = it.next();
