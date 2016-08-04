@@ -73,7 +73,7 @@ public class TestController {
 
 IOC和AOP是Spring的核心,在此Dump也提供了对其的支持。
 
-1. IOC
+1.IOC
 
 利用注解`@Autowired`进行自动装备, 与Spring不同,`@Autowired`需要修饰需要注入的类, 而类里含有set方法的属性,字段
 将自动注入。
@@ -81,7 +81,8 @@ IOC和AOP是Spring的核心,在此Dump也提供了对其的支持。
 2.AOP
 
 AOP及动态代理的实现基于`@Aspect`,`@PointCut`,`@Before`,`@After`. `@Aspect`用于定义切面,用`@Aspect`修饰的
-类将自动注入代理类,而需要被代理的方法用`@PointCut`修饰, `@Before`和`@After`用于制定通知,处理代理函数。
+类将自动注入代理类,而需要被代理的方法用`@PointCut`修饰, `@Before`和`@After`用于制定通知,处理代理函数。基本注解的
+用法和Spring相同,在此也不做赘述。
 
 
 **以上为Dump的基本功能以及用法介绍, Dump还有很多特性以及细节这里未能提及到, 想具体了解的可以fork本项目
