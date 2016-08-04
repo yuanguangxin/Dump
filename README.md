@@ -25,7 +25,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 ![](web/screenshots/jdbc.png)
 
 当然`web.xml`文件也要配置为Dump默认的Filter,代码如下
-```
+```xml
     <servlet>
         <servlet-name>dump</servlet-name>
         <servlet-class>com.dump.filter.DefaultFilter</servlet-class>
@@ -43,7 +43,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 和Spring mvc用法几乎相同, 使用`@Controller`来表示它是一个控制器类,`@RequestMapping`用于匹配它的url,
 `@Param`用于匹配表单的name值,当然,和Spring mvc一样, 你也可以直接传人具体类来自动填充属性值。下面展示了这三个
 基本注解的使用。
-```
+```java
 @Controller
 public class TestController {
     @RequestMapping("/a")
@@ -61,12 +61,14 @@ public class TestController {
 `selectByPage()`。其中的用法,参数,实现功能和Hibernate完全一致,在此不做赘述。
 
 逆向工程:Dump支持自动填充Model层代码完成映射,只需要在任何位置运行以下代码:
-```
+```java
+public class Test {
     public static void main(String[] args) throws Exception{
         //第一个参数为表名,第二个参数为生成的文件路径
         SqlCreater.createModel("student","com.model");
         SqlCreater.createModel("teacher","com.model");
     }
+}
 ```
 
 ## IOC/AOP
