@@ -1,10 +1,9 @@
 package com.dump.filter;
 
+import com.dump.bean.BeanFactory;
 import com.dump.filter.annotation.Param;
 import com.dump.filter.annotation.RequestMapping;
-import com.dump.filter.util.FindClassByAnnotationName;
-import com.sun.tools.javac.util.Convert;
-import test.model.Student;
+import com.dump.util.FindClassByAnnotationName;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -44,56 +43,67 @@ public class DefaultFilter extends HttpServlet {
         while (it.hasNext()) {
             Class<?> c = it.next();
             for (Method method : c.getDeclaredMethods()) {
-                Annotation[] anns = method.getDeclaredAnnotations();
-                RequestMapping rm = (RequestMapping) anns[0];
-                if (rm.value().equals(path)) {
-                    try {
-                        Parameter[] parameters = method.getParameters();
-                        Object[] paras = new Object[parameters.length];
-                        for (int i = 0; i < parameters.length; i++) {
-                            Parameter p = parameters[i];
-                            if (p.getType().equals(HttpServletRequest.class)) {
-                                paras[i] = request;
-                            } else if (p.getType().equals(HttpServletResponse.class)) {
-                                paras[i] = response;
-                            } else if (p.getType().equals(HttpSession.class)) {
-                                paras[i] = request.getSession();
-                            } else {
-                                if (p.getDeclaredAnnotation(Param.class) != null) {
-                                    Param param = (Param) p.getDeclaredAnnotations()[0];
-                                    paras[i] = request.getParameter(param.value());
-                                    request.setAttribute(param.value(), request.getParameter(param.value()));
+                RequestMapping rm = method.getDeclaredAnnotation(RequestMapping.class);
+                if(rm!=null){
+                    if (rm.value().equals(path)) {
+                        try {
+                            Parameter[] parameters = method.getParameters();
+                            Object[] paras = new Object[parameters.length];
+                            for (int i = 0; i < parameters.length; i++) {
+                                Parameter p = parameters[i];
+                                if (p.getType().equals(HttpServletRequest.class)) {
+                                    paras[i] = request;
+                                } else if (p.getType().equals(HttpServletResponse.class)) {
+                                    paras[i] = response;
+                                } else if (p.getType().equals(HttpSession.class)) {
+                                    paras[i] = request.getSession();
                                 } else {
-                                    Class modelClass = p.getType();
-                                    Object obj = modelClass.newInstance();
-                                    Field[] fields = modelClass.getDeclaredFields();
-                                    for (Field f : fields) {
-                                        f.setAccessible(true);
-                                        String fieldParam = f.getName();
-                                        if(f.getType().equals(String.class)){
-                                            f.set(obj,request.getParameter(fieldParam));
-                                        }else if(f.getType().equals(int.class)){
-                                            if(request.getParameter(fieldParam)!=""){
-                                                f.set(obj,Integer.parseInt(request.getParameter(fieldParam)));
-                                            }else {
-                                                f.set(obj,0);
+                                    if (p.getDeclaredAnnotation(Param.class) != null) {
+                                        Param param = (Param) p.getDeclaredAnnotations()[0];
+                                        paras[i] = request.getParameter(param.value());
+                                        request.setAttribute(param.value(), request.getParameter(param.value()));
+                                    } else {
+                                        Class modelClass = p.getType();
+                                        Object obj = modelClass.newInstance();
+                                        Field[] fields = modelClass.getDeclaredFields();
+                                        for (Field f : fields) {
+                                            f.setAccessible(true);
+                                            String fieldParam = f.getName();
+                                            if (f.getType().equals(String.class)) {
+                                                f.set(obj, request.getParameter(fieldParam));
+                                            } else if (f.getType().equals(int.class)) {
+                                                if (request.getParameter(fieldParam) != "") {
+                                                    f.set(obj, Integer.parseInt(request.getParameter(fieldParam)));
+                                                } else {
+                                                    f.set(obj, 0);
+                                                }
                                             }
                                         }
+                                        paras[i] = obj;
                                     }
-                                    paras[i] = obj;
                                 }
                             }
+                            Object o = c.newInstance();
+                            for (Field field:c.getDeclaredFields()){
+                                String fName = field.getName();
+                                Object ob = BeanFactory.getBeanFactory().getBean(fName);
+                                try {
+                                    field.setAccessible(true);
+                                    field.set(o,ob);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (method.getReturnType().equals(String.class)) {
+                                returnUrl = (String) method.invoke(o, paras);
+                            } else {
+                                method.invoke(o, paras);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        Object o = c.newInstance();
-                        if (method.getReturnType().equals(String.class)) {
-                            returnUrl = (String) method.invoke(o, paras);
-                        } else {
-                            method.invoke(o, paras);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        break findUrl;
                     }
-                    break findUrl;
                 }
             }
         }

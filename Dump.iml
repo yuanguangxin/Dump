@@ -22,5 +22,6 @@
     <orderEntry type="library" name="mysql-connector" level="project" />
     <orderEntry type="library" name="servlet" level="project" />
     <orderEntry type="library" name="xom" level="project" />
+    <orderEntry type="library" name="cglib" level="project" />
   </component>
 </module>

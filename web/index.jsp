@@ -7,7 +7,7 @@
   <body>
   <form action="/a.action">
     id:<input type="text" name="id"/>
-    username:<input type="text" name="username"/>
+    name:<input type="text" name="name"/>
     <input type="submit" value="提交"/>
   </form>
   </body>

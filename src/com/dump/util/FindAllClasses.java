@@ -1,4 +1,4 @@
-package com.dump.filter.util;
+package com.dump.util;
 
 import java.io.File;
 import java.io.FileFilter;
