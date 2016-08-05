@@ -13,69 +13,76 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class BeanFactory {
-    private HashMap<String, HashMap<String, Object>> config = new HashMap<>();
+    private static HashMap<String, HashMap<String, Object>> config = new HashMap();
+    private static BeanFactory beanFactory = new BeanFactory();
 
-    public static BeanFactory getBeanFactory(){
-        return new BeanFactory();
-    }
+    public static BeanFactory getBeanFactory() {
+        Set cons = null;
 
-    private BeanFactory() {
-        Set<Class<?>> cons = null;
         try {
             cons = FindClassByAnnotationName.getClass(PackagePath.getPath(), "com.dump.bean.annotation.Autowired");
-            Iterator<Class<?>> it = cons.iterator();
-            while (it.hasNext()) {
-                Class<?> cl = it.next();
-                HashMap<String, Object> beanConfig = new HashMap<>();
+            Iterator e = cons.iterator();
+
+            while(e.hasNext()) {
+                Class cl = (Class)e.next();
+                HashMap beanConfig = new HashMap();
                 beanConfig.put("class", cl.getName());
                 config.put(cl.getSimpleName().substring(0, 1).toLowerCase() + cl.getSimpleName().substring(1), beanConfig);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var4) {
+            var4.printStackTrace();
         }
+
+        return beanFactory;
     }
 
-    public Object getBean(String beanID) {
-        // 获取hashMap配置内容
-        HashMap<String, Object> beanConfig = this.config.get(beanID);
-        // 获取完整类名
-        String className = (String) beanConfig.get("class");
-        Class<?> bean = null;
+    private BeanFactory() {
+    }
+
+    public static Object getBean(String beanID) {
+        HashMap beanConfig = (HashMap)config.get(beanID);
+        String className = (String)beanConfig.get("class");
+        Class bean = null;
+
         try {
-            // 获取类类型实例
             bean = Class.forName(className);
-        } catch (ClassNotFoundException e1) {
-            e1.printStackTrace();
+        } catch (ClassNotFoundException var15) {
+            var15.printStackTrace();
         }
+
         Object instance = null;
+
         try {
-            // 获取这个类的一个实例
-            if(bean.getAnnotation(Aspect.class)==null){
+            if(bean.getAnnotation(Aspect.class) == null) {
                 instance = bean.newInstance();
-            }else {
-                instance = ProxyInstance.getAuthInstanceByFilter(bean,new DumpProxy());
+            } else {
+                instance = ProxyInstance.getAuthInstanceByFilter(bean, new DumpProxy());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception var14) {
+            var14.printStackTrace();
         }
-        for (Field field : bean.getDeclaredFields()) {
-            // 获取属性名
+
+        Field[] e = bean.getDeclaredFields();
+        int var6 = e.length;
+
+        for(int var7 = 0; var7 < var6; ++var7) {
+            Field field = e[var7];
             String fieldName = field.getName();
             Method method = null;
+
             try {
-                method = bean.getDeclaredMethod(
-                        "set" + fieldName.substring(0, 1).toUpperCase()
-                                + fieldName.substring(1),
-                        new Class[] { field.getType() });
-            } catch (Exception e) {
-                e.printStackTrace();
+                method = bean.getDeclaredMethod("set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1), new Class[]{field.getType()});
+            } catch (Exception var13) {
+                var13.printStackTrace();
             }
+
             try {
-                method.invoke(instance, new Object[] { getBean(fieldName) });
-            } catch (Exception e){
-                e.printStackTrace();
+                method.invoke(instance, new Object[]{getBean(fieldName)});
+            } catch (Exception var12) {
+                var12.printStackTrace();
             }
         }
+
         return instance;
     }
 }

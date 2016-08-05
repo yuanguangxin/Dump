@@ -5,10 +5,6 @@
     <title></title>
   </head>
   <body>
-  <form action="/a.action">
-    id:<input type="text" name="id"/>
-    name:<input type="text" name="name"/>
-    <input type="submit" value="提交"/>
-  </form>
+    This is index.jsp.
   </body>
 </html>
