@@ -6,5 +6,9 @@
   </head>
   <body>
     This is index.jsp.
+    <form action="/test.action" method="post">
+      username: <input type="text" name="username"/>
+      <input type="submit" value="submit">
+    </form>
   </body>
 </html>

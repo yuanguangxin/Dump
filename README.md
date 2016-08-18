@@ -170,6 +170,62 @@ public class UserDao {
 }
 ```
 
+## V1.1更新(2016.08.18)
+
+1.支持多组URL映射到同一方法中
+
+示例:
+```java
+@Autowired
+@Controller
+public class UserController {
+    private UserService userService;
+    
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+    
+    @RequestMapping({"/login","/test"})
+    public String login(HttpSession session,
+                      User user) throws Exception{
+        User us = userService.login(user);
+        return "test.jsp";
+    }
+}
+```
+2.简化查询语句
+```java
+public class UserDao {
+    @Pointcut
+    public User login(User user){
+        //第一个参数调整为查询条件
+        List<User> list = Session.getSession().selectBysql("username = ? and password = ?",User.class,user.getUsername(),user.getPassword());
+        if(list.size()!=0){
+            return list.get(0);
+        }else {
+            return null;
+        }
+    }
+}
+```
+3.增加拦截器接口,用于实现权限管理
+```java
+@Handle({".*.action",".*.html"})
+@Except(".*test.action")
+public class BaseHandle implements Interceptor{
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(request.getSession.getAttribute("user")==null){
+            request.getRequestDispatcher("/tests.jsp").forward(request, response);
+            return false;
+        }else return true;
+    }
+}
+```
+Handle和Except都支持写入多组url或正则表达式进行url匹配, `@Handle`表示你想要拦截的url,`@Except`表示你要
+除去的url(不拦截的), 拦截器统一实现Interceptor接口,并通过重写preHandle方法进行拦截,若返回值为false表明拦截并
+跳过action(Controller)层方法,返回为true则正常执行。
+
 
 以上为Dump的基本功能以及用法介绍，Dump还有很多特性以及细节这里未能提及到。
 

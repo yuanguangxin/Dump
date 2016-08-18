@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Session工厂,用于操作数据库
+ */
 public class Session {
     private static Session ourInstance = new Session();
 
@@ -178,6 +181,7 @@ public class Session {
     }
 
     public List selectBysql(String sql, Class clazz, Object... objs) {
+        sql = "select * from " + clazz.getSimpleName() + " where "+sql;
         ResultSet rs = JDBCUtil.executeQuery(sql, objs);
         List list = this.doQuery(rs, clazz);
         return list;

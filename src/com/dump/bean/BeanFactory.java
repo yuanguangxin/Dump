@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Dump的Bean容器,采用HashMap实现
+ */
 public class BeanFactory {
     private static HashMap<String, HashMap<String, Object>> config = new HashMap();
     private static BeanFactory beanFactory = new BeanFactory();
