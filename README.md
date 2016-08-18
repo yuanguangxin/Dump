@@ -16,7 +16,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 ### jar包下载
 
-你可以clone本项目到你的路径下, 也可以导入jar包, [点此下载](https://pan.baidu.com/s/1qXQcg6w),除了项目本身的jar包,项目还依赖于
+你可以clone本项目到你的路径下, 也可以导入jar包, [点此下载](https://pan.baidu.com/s/1jIvxiPS),除了项目本身的jar包,项目还依赖于
 `cglib.jar`和`asm.jar`用于实现动态代理。其jar包文件在本仓库lib文件夹下,可直接下载。
 
 ### 配置文件
@@ -194,6 +194,8 @@ public class UserController {
 }
 ```
 2.简化查询语句
+
+示例:
 ```java
 public class UserDao {
     @Pointcut
@@ -209,6 +211,8 @@ public class UserDao {
 }
 ```
 3.增加拦截器接口,用于实现权限管理
+
+示例:
 ```java
 @Handle({".*.action",".*.html"})
 @Except(".*test.action")
