@@ -10,9 +10,19 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 ## Structure
 
-![](web/screenshots/structure.png)
+![](src/main/resources/screenshots/structure.png)
 
 ## How To Use
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>group.dump</groupId>
+    <artifactId>Dump</artifactId>
+    <version>1.2</version>
+</dependency>
+```
 
 ### jar包下载
 
@@ -23,7 +33,7 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 项目唯一需要你配置的就是数据库的配置文件, 配置文件名为`jdbc.properties`,位于src目录下,配置项如下。
 
-![](web/screenshots/jdbc.png)
+![](src/main/resources/screenshots/config.png)
 
 **注:配置项packageName的配置内容不能等于Dump的默认包名,即不能等于com.**
 
@@ -45,6 +55,8 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 
 和Spring mvc用法几乎相同, 使用`@Controller`来表示它是一个控制器类,`@RequestMapping`用于匹配它的url,
 `@Param`用于匹配表单的name值,当然,和Spring mvc一样, 你也可以直接传人具体类来自动填充属性值。
+需要注意的是,Dump中Controller可传递的参数代表其url路径(对应spring mvc里的RequestMapping),而Dump的RequestMapping只
+能修饰Controller内的函数。Controller和RequestMapping都支持多组url映射。例：`@Controller({"/user","/friend"})`
 
 示例代码:
 ```java
@@ -172,45 +184,7 @@ public class UserDao {
 
 ## V1.1更新(2016.08.18)
 
-1.支持多组URL映射到同一方法中
-
-示例:
-```java
-@Autowired
-@Controller
-public class UserController {
-    private UserService userService;
-    
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-    
-    @RequestMapping({"/login","/test"})
-    public String login(HttpSession session,
-                      User user) throws Exception{
-        User us = userService.login(user);
-        return "test.jsp";
-    }
-}
-```
-2.简化查询语句
-
-示例:
-```java
-public class UserDao {
-    @Pointcut
-    public User login(User user){
-        //第一个参数调整为查询条件
-        List<User> list = Session.getSession().selectBysql("username = ? and password = ?",User.class,user.getUsername(),user.getPassword());
-        if(list.size()!=0){
-            return list.get(0);
-        }else {
-            return null;
-        }
-    }
-}
-```
-3.增加拦截器接口,用于实现权限管理
+1.增加拦截器接口,用于实现权限管理
 
 示例:
 ```java
@@ -230,6 +204,29 @@ Handle和Except都支持写入多组url或正则表达式进行url匹配, `@Hand
 除去的url(不拦截的), 拦截器统一实现Interceptor接口,并通过重写preHandle方法进行拦截,若返回值为false表明拦截并
 跳过action(Controller)层方法,返回为true则正常执行。
 
+2.简化查询语句
+
+示例:
+```java
+public class UserDao {
+    @Pointcut
+    public User login(User user){
+        //第一个参数调整为查询条件
+        List<User> list = Session.getSession().selectBysql("username = ? and password = ?",User.class,user.getUsername(),user.getPassword());
+        if(list.size()!=0){
+            return list.get(0);
+        }else {
+            return null;
+        }
+    }
+}
+```
+
+## V1.2更新(2017.09.29)
+
+1.Maven重构
+
+2.性能优化
 
 以上为Dump的基本功能以及用法介绍，Dump还有很多特性以及细节这里未能提及到。
 
