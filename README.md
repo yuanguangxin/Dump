@@ -24,6 +24,8 @@ Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.
 </dependency>
 ```
 
+**Maven仓库正在上传中，若无法找到依赖，可clone本项目，自行打包到本地仓库中(在文件目录执行`mvn clean install`即可)**
+
 ### jar包下载
 
 你可以clone本项目到你的路径下, 也可以导入jar包, [点此下载](https://pan.baidu.com/s/1jIvxiPS),除了项目本身的jar包,项目还依赖于
