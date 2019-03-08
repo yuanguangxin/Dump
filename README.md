@@ -1,6 +1,6 @@
 # Dump－一个轻量级mvc框架
 
-**快速了解可根据文档阅读Demo: [A Demo of Dump](https://github.com/yuanguangxin/DumpDemo)**
+**快速了解可根据文档阅读Demo: [Demo of Dump](https://github.com/yuanguangxin/DumpDemo)**
 
 ## Info
 
