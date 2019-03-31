@@ -1,10 +1,10 @@
 # Dump－一个轻量级mvc框架
 
-**快速了解可根据文档阅读Demo: [Dump Demo](https://github.com/yuanguangxin/DumpDemo)**
+**快速了解可根据文档阅读Demo: [Demo](https://github.com/yuanguangxin/DumpDemo)**
 
 ## Info
 
-Dump是一个轻量级mvc框架, 正如它的名字一样, Simple is everything.Dump是一个轻配置,完全基于注解开发的
+Dump是一个轻量级mvc框架, 正如它的名字一样.Dump是一个轻配置,完全基于注解开发的
 框架, 他甚至没有自己的xml文件,一切基于注解。Dump分为三个模块, 它们各执其责, 相互配合完成整个工作。当然,
 三个模块也相互独立,完全解藕,可根据需要自行设定选择。
 
@@ -100,10 +100,10 @@ public class UserController {
 public class UserDao {
     public User login(User user){
         List<User> list = Session.getSession().selectBysql("select * from user where username = ? and password = ?",User.class,user.getUsername(),user.getPassword());
-        //Session.getSession().save(user);//把user加入数据库中
-        //Session.getSession().load(User.class,2);加载id为2的User(删除delete,更新update同理)
-        //Session.getSession().getAll(User.class);得到数据库里user的所有映射类(getCount同理)
-        //Session.getSession().selectByPage("select * from user",User.class,int pageNo, int pageSize);//得到指定页制定大小的实体类列表
+        Session.getSession().save(user);//把user加入数据库中
+        Session.getSession().load(User.class,2);//加载id为2的User(删除delete,更新update同理)
+        Session.getSession().getAll(User.class);//得到数据库里user的所有映射类(getCount同理)
+        Session.getSession().selectByPage("select * from user",User.class,int pageNo, int pageSize);//得到指定页制定大小的实体类列表
         if(list.size()!=0){
             return list.get(0);
         }else {
@@ -231,10 +231,6 @@ public class UserDao {
 以上为Dump的基本功能以及用法介绍，Dump还有很多特性以及细节这里未能提及到。
 
 **想具体了解的可以fork本项目参与开发，也可以浏览用于本项目完成的[Demo实例](https://github.com/yuanguangxin/DumpDemo)，喜欢的可以给我点个star给予支持，欢迎大家提出宝贵意见。**
-
-**另外，我的博客发表了关于Dump的具体细节以及实现思路，欢迎浏览。**
-
-**[My Blog](http://yuanguangxin.me)**
 
 
 

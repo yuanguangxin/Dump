@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * JDBCUtil  管理java连接数据库事务
+ * JDBCUtil  管理java连接数据库连接数
  */
 
 public class JDBCUtil {
