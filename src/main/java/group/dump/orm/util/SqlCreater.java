@@ -128,8 +128,4 @@ public class SqlCreater {
         }
         return str.toString();
     }
-
-    public static void main(String[] args) throws Exception {
-        SqlCreater.createModel("user", "group.dump.orm.util");
-    }
 }
