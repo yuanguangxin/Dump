@@ -1,6 +1,5 @@
 package group.dump.orm.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -16,7 +15,7 @@ import java.util.Properties;
  */
 
 public class JDBCUtil {
-    //初始化
+
     static {
         init();
         initPool();
@@ -34,9 +33,6 @@ public class JDBCUtil {
         try {
             InputStream is = JDBCUtil.class.getClassLoader().getResourceAsStream("dump.properties");
             property.load(is);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return;
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -186,7 +182,6 @@ public class JDBCUtil {
                 res.close();
             } catch (SQLException e) {
                 e.printStackTrace();
-                return;
             }
         }
     }
