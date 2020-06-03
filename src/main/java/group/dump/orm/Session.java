@@ -1,107 +1,114 @@
 package group.dump.orm;
 
-import group.dump.orm.util.JDBCUtil;
+import group.dump.exception.DumpException;
+import group.dump.orm.util.JdbcUtil;
+import group.dump.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * Session工厂,用于操作数据库
+ * @author yuanguangxin
  */
 public class Session {
-    private static Session ourInstance = new Session();
+    private static Session instance = new Session();
 
     private Session() {
     }
 
-    public static Session getSession() {
-        return ourInstance;
+    static Session getSession() {
+        return instance;
     }
 
-    private String[] getP(Object obj) {
-        Class clazz = obj.getClass();
-        String className = clazz.getSimpleName();
-        String pri = this.getPri(className);
+    public String[] getFieldAndValue(Object obj) {
+        Class<?> clazz = obj.getClass();
         Field[] fields = clazz.getDeclaredFields();
-        String[] p = new String[]{"", "", ""};
+        String[] result = new String[]{"", ""};
 
-        for(int i = 0; i < fields.length; ++i) {
-            Field f = fields[i];
-
+        for (Field f : fields) {
             try {
                 f.setAccessible(true);
-                if(f.getName().equals(pri)) {
-                    p[2] = f.get(obj).toString();
-                }
-
-                if(!f.getName().equals(pri) || !f.get(obj).equals("0")) {
-                    p[0] = p[0] + f.getName() + ",";
-                    p[1] = p[1] + "\'" + f.get(obj) + "\'" + ",";
+                if (f.get(obj) != null) {
+                    result[0] = result[0].concat(StringUtils.camelToUnderline(f.getName()) + ",");
+                    result[1] = result[1].concat("'" + f.get(obj) + "'" + ",");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
-
-        p[0] = p[0].substring(0, p[0].length() - 1);
-        p[1] = p[1].substring(0, p[1].length() - 1);
-        return p;
+        if (!"".equals(result[0])) {
+            result[0] = result[0].substring(0, result[0].length() - 1);
+        }
+        if (!"".equals(result[1])) {
+            result[1] = result[1].substring(0, result[1].length() - 1);
+        }
+        return result;
     }
 
-    public void save(Object obj) {
-        Class clazz = obj.getClass();
-        String className = clazz.getSimpleName();
-        String[] p = this.getP(obj);
-        String sql = "insert into " + className + "(" + p[0] + ") values(" + p[1] + ");";
-        JDBCUtil.executeUpdate(sql, new Object[0]);
+    public int save(Object obj) {
+        Class<?> clazz = obj.getClass();
+        String tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        String[] fieldValues = this.getFieldAndValue(obj);
+        String sql = "insert into " + tableName + "(" + fieldValues[0] + ") values(" + fieldValues[1] + ");";
+        return JdbcUtil.executeUpdate(sql);
     }
 
-    public void delete(Object obj) {
-        Class clazz = obj.getClass();
-        String className = clazz.getSimpleName();
-        String[] p = this.getP(obj);
-        String sql = "delete from " + className + " where " + this.getPri(className) + "=" + p[2];
-        JDBCUtil.executeUpdate(sql, new Object[0]);
-    }
-
-    public void delete(Class<?> clazz, int id) {
-        Object obj = null;
-
+    public int delete(Object obj) {
+        Class<?> clazz = obj.getClass();
+        String tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        String priName = this.getPri(tableName);
+        if (priName == null) {
+            throw new DumpException("can not find primary key for table '" + tableName + "'");
+        }
+        String sql = "";
         try {
-            obj = clazz.newInstance();
+
+            Field priField = clazz.getDeclaredField(StringUtils.underlineToCamel(priName));
+            priField.setAccessible(true);
+            sql = "delete from " + tableName + " where " + priName + "=" + priField.get(obj);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        String className = clazz.getSimpleName();
-        this.getP(obj);
-        String sql = "delete from " + className + " where " + this.getPri(className) + "=" + id;
-        JDBCUtil.executeUpdate(sql, new Object[0]);
+        return JdbcUtil.executeUpdate(sql);
     }
 
-    public void update(Object obj) {
-        Class clazz = obj.getClass();
-        String className = clazz.getSimpleName();
-        String[] p = this.getP(obj);
-        String[] p1 = p[0].split(",");
-        String[] p2 = p[1].split(",");
-        String modify = "";
+    public int delete(Class<?> clazz, int id) {
+        String tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        String sql = "delete from " + tableName + " where " + getPri(tableName) + "=" + id;
+        return JdbcUtil.executeUpdate(sql);
+    }
 
-        for(int sql = 0; sql < p1.length; ++sql) {
-            modify = modify + p1[sql] + "=" + p2[sql] + ",";
+    public int update(Object obj) {
+        Class<?> clazz = obj.getClass();
+        String tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        String[] fieldValues = this.getFieldAndValue(obj);
+        String[] fields = fieldValues[0].split(",");
+        String[] values = fieldValues[1].split(",");
+        String modify = "";
+        String priName = this.getPri(tableName);
+
+        for (int sql = 0; sql < fields.length; ++sql) {
+            modify = modify.concat(StringUtils.camelToUnderline(fields[sql]) + "=" + values[sql] + ",");
         }
 
         modify = modify.substring(0, modify.length() - 1);
-        String str = "update " + className + " set " + modify + " where " + this.getPri(className) + "=" + p[2];
-        JDBCUtil.executeUpdate(str, new Object[0]);
+        String str = null;
+        try {
+            Field priField = clazz.getDeclaredField(StringUtils.underlineToCamel(priName));
+            priField.setAccessible(true);
+            str = "update " + tableName + " set " + modify + " where " + priName + "=" + priField.get(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return JdbcUtil.executeUpdate(str);
     }
 
-    public Object load(Class clazz, int id) {
-        String className = clazz.getSimpleName();
-        Object obj = null;
+    public <T> T load(Class<T> clazz, int id) {
+        String tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        T obj = null;
 
         try {
             obj = clazz.newInstance();
@@ -109,20 +116,24 @@ public class Session {
             e.printStackTrace();
         }
 
-        this.getP(obj);
-        String sql = "select * from " + className + " where " + this.getPri(className) + "=" + id;
-        ResultSet rs = JDBCUtil.executeQuery(sql, new Object[0]);
+        String sql = "select * from " + tableName + " where " + this.getPri(tableName) + "=" + id;
+        ResultSet rs = JdbcUtil.executeQuery(sql);
         Field[] fields = clazz.getDeclaredFields();
 
         try {
-            if(rs.next()) {
-                for(int e = 0; e < fields.length; ++e) {
-                    fields[e].setAccessible(true);
-                    fields[e].set(obj, rs.getObject(fields[e].getName()));
+            if (!rs.next()) {
+                return null;
+            }
+
+            rs.beforeFirst();
+            while (rs.next()) {
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    field.set(obj, rs.getObject(StringUtils.camelToUnderline(field.getName())));
                 }
             }
 
-            JDBCUtil.freeResultSet(rs);
+            JdbcUtil.freeResultSet(rs);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -130,18 +141,18 @@ public class Session {
         return obj;
     }
 
-    public int getCount(Class clazz) {
-        String className = clazz.getSimpleName();
-        String sql = "select count(*) from " + className;
-        ResultSet rs = JDBCUtil.executeQuery(sql, new Object[0]);
+    public int getCount(Class<?> clazz) {
+        String tableName = clazz.getSimpleName();
+        String sql = "select count(1) from " + tableName;
+        ResultSet rs = JdbcUtil.executeQuery(sql);
         int count = 0;
 
         try {
-            if(rs.next()) {
+            if (rs.next()) {
                 count = rs.getInt(1);
             }
 
-            JDBCUtil.freeResultSet(rs);
+            JdbcUtil.freeResultSet(rs);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -149,23 +160,23 @@ public class Session {
         return count;
     }
 
-    private List doQuery(ResultSet rs, Class clazz) {
-        ArrayList list = new ArrayList();
+    private <T> List<T> doQuery(ResultSet rs, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
         Field[] fields = clazz.getDeclaredFields();
 
         try {
-            while(rs.next()) {
-                Object e = clazz.newInstance();
+            while (rs.next()) {
+                T instance = clazz.newInstance();
 
-                for(int i = 0; i < fields.length; ++i) {
+                for (int i = 0; i < fields.length; ++i) {
                     fields[i].setAccessible(true);
-                    fields[i].set(e, rs.getObject(fields[i].getName()));
+                    fields[i].set(instance, rs.getObject(StringUtils.camelToUnderline(fields[i].getName())));
                 }
 
-                list.add(e);
+                list.add(instance);
             }
 
-            JDBCUtil.freeResultSet(rs);
+            JdbcUtil.freeResultSet(rs);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -173,41 +184,28 @@ public class Session {
         return list;
     }
 
-    public List getAll(Class clazz) {
-        String sql = "select * from " + clazz.getSimpleName();
-        ResultSet rs = JDBCUtil.executeQuery(sql, new Object[0]);
-        List list = this.doQuery(rs, clazz);
+    public <T> List<T> getAll(Class<T> clazz) {
+        String sql = "select * from " + StringUtils.camelToUnderline(clazz.getSimpleName());
+        ResultSet rs = JdbcUtil.executeQuery(sql);
+        List<T> list = this.doQuery(rs, clazz);
         return list;
     }
 
-    public List selectBysql(String sql, Class clazz, Object... objs) {
-        sql = "select * from " + clazz.getSimpleName() + " where "+sql;
-        ResultSet rs = JDBCUtil.executeQuery(sql, objs);
-        List list = this.doQuery(rs, clazz);
+    public <T> List<T> selectBySql(String sql, Class<T> clazz, Object... objs) {
+        sql = "select * from " + StringUtils.camelToUnderline(clazz.getSimpleName()) + " where " + sql;
+        ResultSet rs = JdbcUtil.executeQuery(sql, objs);
+        List<T> list = this.doQuery(rs, clazz);
         return list;
     }
 
-    public List selectByPage(String sql, Class clazz, int pageNo, int pageSize, Object... objs) {
-        sql = sql + " limit " + (pageNo - 1) * pageSize + "," + pageSize;
-        ResultSet rs = JDBCUtil.executeQuery(sql, objs);
-        List list = this.doQuery(rs, clazz);
+    public <T> List<T> selectByPage(String sql, Class<T> clazz, int pageNo, int pageSize, Object... objs) {
+        sql = "select * from " + StringUtils.camelToUnderline(clazz.getSimpleName()) + " where " + sql + " limit " + (pageNo - 1) * pageSize + "," + pageSize;
+        ResultSet rs = JdbcUtil.executeQuery(sql, objs);
+        List<T> list = this.doQuery(rs, clazz);
         return list;
     }
 
     private String getPri(String tableName) {
-        String sql = "select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where table_name=\'" + tableName + "\' AND COLUMN_KEY=\'PRI\';";
-        ResultSet rs = JDBCUtil.executeQuery(sql, new Object[0]);
-
-        try {
-            if(rs.next()) {
-                return rs.getString(1);
-            }
-
-            JDBCUtil.freeResultSet(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return "";
+        return JdbcUtil.getTablePri(tableName);
     }
 }

@@ -1,20 +1,16 @@
 package group.dump.orm.util;
 
+import group.dump.exception.DumpException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * JDBCUtil  管理java连接数据库连接数
+ * @author yuanguangxin
  */
-
-public class JDBCUtil {
+public class JdbcUtil {
 
     static {
         init();
@@ -31,11 +27,10 @@ public class JDBCUtil {
         pool = new ArrayList<>();
         property = new Properties();
         try {
-            InputStream is = JDBCUtil.class.getClassLoader().getResourceAsStream("dump.properties");
+            InputStream is = JdbcUtil.class.getClassLoader().getResourceAsStream("dump.properties");
             property.load(is);
         } catch (IOException e) {
-            e.printStackTrace();
-            return;
+            throw new RuntimeException("load properties failed", e);
         }
         url = property.getProperty("url");
         String driver = property.getProperty("driver");
@@ -44,8 +39,7 @@ public class JDBCUtil {
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return;
+            throw new DumpException("driver not found", e);
         }
         initPool();
     }
@@ -57,7 +51,6 @@ public class JDBCUtil {
                 pool.add(DriverManager.getConnection(url, property));
             } catch (SQLException e) {
                 e.printStackTrace();
-                return;
             }
         }
     }
@@ -69,7 +62,6 @@ public class JDBCUtil {
                 conn = DriverManager.getConnection(url, property);
             } catch (SQLException e) {
                 e.printStackTrace();
-                return null;
             }
         } else {
             conn = pool.remove(0);
@@ -93,75 +85,66 @@ public class JDBCUtil {
             ps = conn.prepareStatement(sql);
         } catch (Exception e) {
             e.printStackTrace();
-            return freeConnection(conn);
         }
+        int result = 0;
         try {
-            ps.executeQuery("show tables");
-        } catch (SQLException e1) {
-            initPool();
-            return executeUpdate(sql, o);
-        }
-        if (o != null) {
-            for (int i = 0; i < o.length; i++) {
-                try {
+            assert ps != null;
+            if (o != null) {
+                for (int i = 0; i < o.length; i++) {
                     ps.setObject(i + 1, o[i]);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return freeConnection(conn);
                 }
             }
-        }
-        int i = -1;
-        try {
-            i = ps.executeUpdate();
-        } catch (SQLException e) {
+            result = ps.executeUpdate();
+            return result;
+        } catch (Exception e) {
             e.printStackTrace();
-            return freeConnection(conn);
+        } finally {
+            freeConnection(conn);
         }
-        freeConnection(conn);
-        return i;
+        return result;
     }
 
 
     public static ResultSet executeQuery(String sql, Object... o) {
         Connection conn = getConnection();
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(sql);
-        } catch (Exception e) {
-            e.printStackTrace();
-            freeConnection(conn);
-            return null;
-        }
-        try {
-            ps.executeQuery("show tables");
-        } catch (SQLException e1) {
-            initPool();
-            return executeQuery(sql, o);
-        }
-        if (o != null) {
-            for (int i = 0; i < o.length; i++) {
-                try {
-                    ps.setObject(i + 1, o[i]);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    freeConnection(conn);
-                    return null;
-                }
-            }
-        }
+        PreparedStatement ps;
         ResultSet res = null;
         try {
+            ps = conn.prepareStatement(sql);
+            if (o != null) {
+                for (int i = 0; i < o.length; i++) {
+                    ps.setObject(i + 1, o[i]);
+                }
+            }
             res = ps.executeQuery();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
+        } finally {
+            freeConnection(conn);
         }
-        freeConnection(conn);
         return res;
     }
 
-    private static int freeConnection(Connection conn) {
+
+    public static String getTablePri(String tableName) {
+        String pkStr = "";
+        ResultSet rs;
+        try {
+            rs = getConnection().getMetaData().getPrimaryKeys(null, null, tableName);
+            if (null == rs) {
+                return pkStr;
+            }
+            while (rs.next()) {
+                pkStr = rs.getString("COLUMN_NAME");
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pkStr;
+    }
+
+    private static void freeConnection(Connection conn) {
         if (conn != null) {
             if (pool.size() < max_size) {
                 pool.add(conn);
@@ -173,7 +156,6 @@ public class JDBCUtil {
                 }
             }
         }
-        return -1;
     }
 
     public static void freeResultSet(ResultSet res) {
