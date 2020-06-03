@@ -105,10 +105,6 @@ public class UserService {
     @Resource
     private UserDao userDao;
 
-    public UserDao getUserDao() {
-        return userDao;
-    }
-
     public void test(){
         userDao.test();
     }
