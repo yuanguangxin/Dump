@@ -1,7 +1,7 @@
 package group.dump.aop.util;
 
 import group.dump.aop.annotation.After;
-import group.dump.aop.annotation.AspectJ;
+import group.dump.aop.annotation.Aspect;
 import group.dump.aop.annotation.Before;
 import group.dump.exception.DumpException;
 import group.dump.util.ReflectionUtils;
@@ -23,7 +23,7 @@ public class AspectUtils {
     private static Map<String, Method> advisorAfterMap = new HashMap<>();
 
     static {
-        Set<Class<?>> aspectSet = ReflectionUtils.getAllClass(AspectJ.class);
+        Set<Class<?>> aspectSet = ReflectionUtils.getAllClass(Aspect.class);
         for (Class<?> asp : aspectSet) {
             try {
                 advisorInstanceMap.put(asp, asp.newInstance());

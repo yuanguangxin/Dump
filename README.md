@@ -115,6 +115,26 @@ public class UserService {
 }
 ```
 
+### AOP
+
+使用`@Aspect`,`@Before`,`@After`实现了 AOP 的切面功能，用法和 Spring 相同。
+
+```
+@Aspect
+public class AspectTest {
+
+    @Before("group.dump.test.testAop()")
+    public void before(String arg) {
+        System.out.println(arg);
+    }
+
+    @After("group.dump.test.testAop()")
+    public void after(String arg) {
+        System.out.println(arg);
+    }
+}
+```
+
 ### ORM
 
 对于对象关系映射, Dump 也提供了基本的函数操作, 包括增删改查和分页操作。相对复杂的查询工作还是依赖于 sql 语句，但再也不用你来创建对象了。基本函数有:`save()`,`delete()`, `update()`, `load()`, `getCount()`, `getAll()`, `selectBysql()`, `selectByPage()`。
