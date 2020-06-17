@@ -115,7 +115,7 @@ public class UserService {
 
 使用`@Aspect`,`@Before`,`@After`实现了 AOP 的切面功能，用法和 Spring 相同。
 
-```
+```java
 @Aspect
 public class AspectTest {
 
