@@ -119,12 +119,12 @@ public class UserService {
 @Aspect
 public class AspectTest {
 
-    @Before("group.dump.test.testAop()")
+    @Before("group.dump.test.Test.testAop()")
     public void before(String arg) {
         System.out.println(arg);
     }
 
-    @After("group.dump.test.testAop()")
+    @After("group.dump.test.Test.testAop()")
     public void after(String arg) {
         System.out.println(arg);
     }
