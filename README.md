@@ -143,7 +143,7 @@ public class UserDao {
         SessionFactory.getSession().load(User.class,2);//加载id为2的User(删除delete,更新update同理)
         SessionFactory.getSession().getAll(User.class);//得到数据库里user的所有映射类(getCount同理)
         SessionFactory.getSession().selectByPage("select * from user",User.class,int pageNo, int pageSize);//得到指定页制定大小的实体类列表
-        if(list.size()!=0){
+        if(list.size() != 0){
             return list.get(0);
         }
         return null；
