@@ -145,9 +145,8 @@ public class UserDao {
         SessionFactory.getSession().selectByPage("select * from user",User.class,int pageNo, int pageSize);//得到指定页制定大小的实体类列表
         if(list.size()!=0){
             return list.get(0);
-        }else {
-            return null;
         }
+        return null；
     }
 }
 ```
