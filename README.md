@@ -64,7 +64,7 @@ min_conn=5
 
 ### Controller
 
-和 Spring mvc 用法相同, 使用`@Controller`来表示它是一个控制器类,`@RequestMapping`用于匹配它的 url ,`@RequestParam`用于匹配表单的 name 值。当然你也可以直接传人实体类来自动填充属性值，但是需要用`@RequestModel`来修饰一下实体类。除了直接返回一个指定的视图，支持`@ResponseBody`类型以及重定向类型。
+和 Spring mvc 用法相同, 使用`@Controller`来表示它是一个控制器类,`@RequestMapping`用于匹配它的 url ,`@RequestParam`用于匹配表单的 name 值。当然你也可以直接传入实体类来自动填充属性值，但是需要用`@RequestModel`来修饰一下实体类。除了直接返回一个指定的视图，支持`@ResponseBody`类型以及重定向类型。
 
 ```java
 @Controller
