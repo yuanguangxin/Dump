@@ -1,12 +1,4 @@
-# These are supported funding model platforms
-
-github: [yuanguangxin]
-patreon: # Replace with a single Patreon username
-open_collective: # Replace with a single Open Collective username
-ko_fi: # Replace with a single Ko-fi username
-tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
-community_bridge: Dump
-liberapay: # Replace with a single Liberapay username
-issuehunt: # Replace with a single IssueHunt username
-otechie: # Replace with a single Otechie username
-custom:https://www.baidu.com
+github: [octocat, surftocat]
+patreon: octocat
+tidelift: npm/octo-package
+custom: ["https://www.paypal.me/octocat", octocat.com]
